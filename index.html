@@ -261,7 +261,6 @@
       left: 0;
       cursor: grab;
       z-index: 10;
-      /* importante para que el tamaño visual coincida con el lógico */
       width: 100%;
       height: 100%;
     }
@@ -549,6 +548,12 @@
   </audio>
 
   <script>
+    /* 🔐 Claves de localStorage específicas de ARKANA
+       Para SPIRITA solo cambiás este prefijo. */
+    const STORAGE_PREFIX = 'arkana_encuentra_estrella';
+    const LAST_PLAY_KEY = `${STORAGE_PREFIX}_last_play`;
+    const PRIZE_KEY = `${STORAGE_PREFIX}_prize`;
+
     const prizes = [
       { text: 'Bono a Elección', weight: 35, emoji: '🎁' },
       { text: '100% de Bono', weight: 25, emoji: '💰' },
@@ -596,7 +601,7 @@
     }, 2000);
 
     function checkIfPlayedToday() {
-      const lastPlayDate = localStorage.getItem('arkanaScratchLastPlay');
+      const lastPlayDate = localStorage.getItem(LAST_PLAY_KEY);
       const today = new Date().toDateString();
 
       if (lastPlayDate === today) {
@@ -633,16 +638,12 @@
       const ctx = canvas.getContext('2d');
       const container = canvas.parentElement;
 
-      // tamaño lógico = tamaño visual del contenedor
       canvas.width = container.offsetWidth;
       canvas.height = container.offsetHeight;
-
-      // por si el navegador ignora el CSS del canvas
       canvas.style.width = '100%';
       canvas.style.height = '100%';
 
       function drawScratchLayer() {
-        // Fondo dorado
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, '#FFD700');
         gradient.addColorStop(0.25, '#FFF4CC');
@@ -653,7 +654,6 @@
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Bordes
         ctx.strokeStyle = '#8B1538';
         ctx.lineWidth = 6;
         ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
@@ -662,7 +662,6 @@
         ctx.lineWidth = 2;
         ctx.strokeRect(14, 14, canvas.width - 28, canvas.height - 28);
 
-        // Estrellas de fondo
         ctx.fillStyle = 'rgba(139, 21, 56, 0.2)';
         const starFontSize = Math.min(canvas.width, canvas.height) * 0.12;
         ctx.font = `bold ${starFontSize}px Arial`;
@@ -672,7 +671,6 @@
           ctx.fillText('⭐', x, y);
         }
 
-        // Logo (opcional)
         const logo = new Image();
         logo.crossOrigin = "anonymous";
         logo.src = 'assets/image.png';
@@ -690,7 +688,6 @@
       function drawTextAndLogo(ctx, canvas, logoImg) {
         const minSide = Math.min(canvas.width, canvas.height);
 
-        // Logo centrado arriba
         if (logoImg) {
           const logoSize = minSide * 0.2;
           const logoX = (canvas.width - logoSize) / 2;
@@ -704,10 +701,9 @@
           ctx.shadowBlur = 0;
         }
 
-        // Texto principal "RASPA AQUÍ"
-        let mainFontSize = minSide * 0.16; // base relativo al tamaño menor
-        mainFontSize = Math.min(mainFontSize, 40); // tope para que no explote en mobile
-        mainFontSize = Math.max(mainFontSize, 20); // mínimo legible
+        let mainFontSize = minSide * 0.16;
+        mainFontSize = Math.min(mainFontSize, 40);
+        mainFontSize = Math.max(mainFontSize, 20);
 
         ctx.fillStyle = '#8B1538';
         ctx.textAlign = 'center';
@@ -719,21 +715,18 @@
         const text = 'RASPA AQUÍ';
         let metrics = ctx.measureText(text);
         let textWidth = metrics.width;
-        const maxWidth = canvas.width * 0.8; // margen del 20%
+        const maxWidth = canvas.width * 0.8;
 
         if (textWidth > maxWidth) {
           const scaleFactor = maxWidth / textWidth;
           mainFontSize = mainFontSize * scaleFactor;
           mainFontSize = Math.max(mainFontSize, 16);
           ctx.font = `bold ${mainFontSize}px "Poppins", sans-serif`;
-          metrics = ctx.measureText(text);
-          textWidth = metrics.width;
         }
 
-        const textY = canvas.height * 0.6; // un poco más abajo del centro para dejar sitio al logo
+        const textY = canvas.height * 0.6;
         ctx.fillText(text, canvas.width / 2, textY);
 
-        // Subtítulo
         const subFontSize = mainFontSize * 0.6;
         ctx.font = `bold ${subFontSize}px "Poppins", sans-serif`;
         ctx.fillStyle = '#b01d4a';
@@ -741,11 +734,9 @@
         ctx.shadowBlur = 0;
         ctx.fillText('Descubre tu estrella', canvas.width / 2, textY + mainFontSize * 1.1);
 
-        // A partir de acá, todo lo que pintemos se borra al raspar
         ctx.globalCompositeOperation = 'destination-out';
       }
 
-      // Esperar a que las fuentes estén listas para que measureText sea correcto
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(drawScratchLayer).catch(drawScratchLayer);
       } else {
@@ -849,8 +840,8 @@
       prizeSound.play().catch(e => console.log('Sound play prevented', e));
 
       const today = new Date().toDateString();
-      localStorage.setItem('arkanaScratchLastPlay', today);
-      localStorage.setItem('arkanaScratchPrize', JSON.stringify(currentPrize));
+      localStorage.setItem(LAST_PLAY_KEY, today);
+      localStorage.setItem(PRIZE_KEY, JSON.stringify(currentPrize));
       hasPlayedToday = true;
 
       setTimeout(() => {
@@ -868,7 +859,7 @@
     }
 
     function showAlreadyPlayed() {
-      const savedPrize = localStorage.getItem('arkanaScratchPrize');
+      const savedPrize = localStorage.getItem(PRIZE_KEY);
       let prizeDisplay = '';
 
       if (savedPrize) {
