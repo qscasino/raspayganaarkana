@@ -207,10 +207,11 @@
                   0 0 30px rgba(255, 215, 0, 0.3);
     }
 
+    /* Tarjeta con alto proporcional al ancho (no fijo) */
     .scratch-card {
       position: relative;
       width: 100%;
-      height: 400px;
+      padding-top: 70%; /* alto = 70% del ancho */
       background: linear-gradient(135deg, #2d1810 0%, #1a0e0e 100%);
       display: flex;
       flex-direction: column;
@@ -259,6 +260,8 @@
       position: absolute;
       top: 0;
       left: 0;
+      width: 100%;
+      height: 100%;
       cursor: grab;
       z-index: 10;
     }
@@ -433,10 +436,6 @@
         max-width: 600px;
       }
 
-      .scratch-card {
-        height: 450px;
-      }
-
       .prize-star {
         font-size: 6rem;
       }
@@ -453,10 +452,6 @@
 
       .scratch-container {
         max-width: 100%;
-      }
-
-      .scratch-card {
-        height: 350px;
       }
 
       .prize-star {
@@ -477,10 +472,6 @@
     }
 
     @media (max-width: 480px) {
-      .scratch-card {
-        height: 320px;
-      }
-
       .prize-star {
         font-size: 3.5rem;
       }
@@ -555,10 +546,6 @@
       { text: '5000 Fichas Gratis', weight: 3, emoji: '⭐' },
     ];
 
-    // 🔑 Claves de localStorage específicas para Arkana
-    const STORAGE_LAST_PLAY = 'arkanaScratchLastPlay';
-    const STORAGE_PRIZE     = 'arkanaScratchPrize';
-
     function getWeightedRandomPrize() {
       const totalWeight = prizes.reduce((sum, prize) => sum + prize.weight, 0);
       let random = Math.random() * totalWeight;
@@ -597,7 +584,7 @@
     }, 2000);
 
     function checkIfPlayedToday() {
-      const lastPlayDate = localStorage.getItem(STORAGE_LAST_PLAY);
+      const lastPlayDate = localStorage.getItem('arkanaScratchLastPlay');
       const today = new Date().toDateString();
       
       if (lastPlayDate === today) {
@@ -832,8 +819,8 @@
       prizeSound.play().catch(e => console.log('Sound play prevented'));
 
       const today = new Date().toDateString();
-      localStorage.setItem(STORAGE_LAST_PLAY, today);
-      localStorage.setItem(STORAGE_PRIZE, JSON.stringify(currentPrize));
+      localStorage.setItem('arkanaScratchLastPlay', today);
+      localStorage.setItem('arkanaScratchPrize', JSON.stringify(currentPrize));
       hasPlayedToday = true;
 
       setTimeout(() => {
@@ -851,7 +838,7 @@
     }
 
     function showAlreadyPlayed() {
-      const savedPrize = localStorage.getItem(STORAGE_PRIZE);
+      const savedPrize = localStorage.getItem('arkanaScratchPrize');
       let prizeDisplay = '';
       
       if (savedPrize) {
